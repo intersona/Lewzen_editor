@@ -13,13 +13,13 @@ export function editorWake(editor, toolbar, newHeight, newWidth, newContent, new
     // let newContent = event.currentTarget.innerHTML;
     // setTimeout(() => {
     // console.log(event.currentTarget.clientHeight);
-    editor.setHeight(newHeight);
-    editor.setWidth(newWidth);
-    editor.setLeft(newLeft);
+    editor.setHeight(newHeight > 300 ? newHeight : 300);
+    editor.setWidth(newWidth + 200);
+    editor.setLeft(newLeft - 10 > 0 ? newLeft - 10 : newLeft);
     editor.setTop(newTop);
     editor.setContent(newContent);
     // error
-    // this.$refs.editor.focus();
+    editor.focus();
     toolbar.setEditor(editor.getEditor());
     // console.log(this.$refs.editor.getEditor());
     // }, 0);

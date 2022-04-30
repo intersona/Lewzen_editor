@@ -53,6 +53,8 @@ export default Vue.extend({
           "bold",
           "italic",
           "underline",
+          // '|',
+          // 'insertFormula',
           '|',
           "justifyLeft",
           "justifyRight",

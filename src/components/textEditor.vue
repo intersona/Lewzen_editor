@@ -46,7 +46,17 @@ export default Vue.extend({
     return {
       editor: null,
       valueHtml: "<p>text</p>",
-      editorConfig: {placeholder: "请输入内容..."},
+      editorConfig: {
+        placeholder: "请输入内容...",
+        hoverbarKeys:
+            {
+              formula:
+                  {
+                    menuKeys:
+                        ['editorFormula']
+                  }
+            }
+      },
       mode: "simple", // or 'simple'
       // the height of editor div
       height: 200,
@@ -84,13 +94,16 @@ export default Vue.extend({
     setContent(contentHTML) {
       this.valueHtml = contentHTML;
     },
+    getContent() {
+      return this.valueHtml
+    },
     // get the editor instance
     getEditor() {
       return this.editor;
     },
     focus() {
-      this.editorRef.focus();
-      this.editorRef.selectAll();
+      this.editor.focus();
+      this.editor.selectAll();
     },
     // the function when the editor lose focal(blur)
     handleBlur() {

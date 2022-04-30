@@ -12,8 +12,19 @@
               style="display: inline-block"
               @dblclick="ondblclick"
           >
-            <p>hel111111111111lo</p>
+            <p><em>hel11111</em><em><strong>111</strong></em><u><em><strong>111</strong></em></u><u><em>1lo</em></u></p>
           </div>
+        </foreignObject>
+      </g>
+      <g>
+        <foreignObject width="100%" height="100%" style="display: inline-block" x="100" y="100">
+          <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <msubsup>
+              <mo>&#x222B;<!-- 积分 --></mo>
+              <mn>0</mn>
+              <mn>1</mn>
+            </msubsup>
+          </math>
         </foreignObject>
       </g>
     </svg>
@@ -66,18 +77,16 @@ export default {
       // // }, 0);
       this.editting = editorWake(this.$refs.editor,
           this.$refs.toolbar,
-          event.currentTarget.clientHeight > 300
-              ? event.currentTarget.clientHeight
-              : 300,
-          event.currentTarget.clientWidth + 30,
+          event.currentTarget.clientHeight,
+          event.currentTarget.clientWidth,
           event.currentTarget.innerHTML,
-          event.currentTarget.offsetLeft - 10 > 0
-              ? event.currentTarget.offsetLeft - 10
-              : event.currentTarget.offsetLeft,
+          event.currentTarget.offsetLeft,
           event.currentTarget.offsetTop);
     },
     onEditorBlur() {
-      this.editting = editorHide();
+      this.editting = false;
+      // console.log(this.$refs.editor.getContent())
+      editorHide();
     },
   },
 }
