@@ -5,6 +5,7 @@
 /* See https://github.com/fred-wang/mathml.css */
 
 @namespace "http://www.w3.org/1999/xhtml";
+/*@namespace "http://www.w3.org/1998/Math/MathML";*/
 
 /* math */
 math {
@@ -96,13 +97,18 @@ msqrt, mroot {
 
 msqrt:before, mroot:before {
     margin-left: -.5em;
+    /*added*/
+    margin-top: .1em;
     content: "\221A";
 }
 
 mroot > *:nth-child(2) {
     margin-right: .25em;
     margin-left: -.75em;
-    font-size: 0.8em;
+    /*added*/
+    margin-top: -.2em;
+    /*adjusted*/
+    font-size: 0.6em;
     order: -1;
 }
 

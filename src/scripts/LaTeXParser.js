@@ -2,20 +2,33 @@
  * @description parse LaTeX formula into MathML
  * @author lzh
  */
-
+/* eslint-disable */
 /*
     the type of latex commands
     CONST:character with no parameter
+
     UNARY:func or symbol with 1 parameter, such as '\sqrt'
+        sqrt/not;
+        function(triangle);
+        special marks;
+        type styles
+
     BINARY:func or symbol with 2 parameters, such as '\frac'
+
     INFIX:symbol with 1 parameter, such as '^'
+
     LEFRBRACKET&RIGHTBRACKET:closed symbols, such as '[' & ']'
+
     SPACE:space between elements
+
     UNDEROVER:two para and have to be <munder> and <mover>
+
     TEXT:text for notes
  */
 
-const MathMLNS = "http://www.w3.org/1998/Math/MathML";
+// TODO: should be
+const MathMLNS
+    = "http://www.w3.org/1999/xhtml";
 
 var CONST = 0, UNARY = 1, BINARY = 2, INFIX = 3, LEFTBRACKET = 4,
     RIGHTBRACKET = 5, SPACE = 6, UNDEROVER = 7, DEFINITION = 8,
@@ -576,20 +589,167 @@ function getSymbol(str) {
     return {input: substr, tag: tagstr, output: substr, ttype: currentSymbol};
 }
 
+/**
+ * parse symbol command and returns [node, remain_sub_str, tag]
+ * if there is parameter or bracket parse too
+ * @param str
+ * @returns {(Element|*|string)[]}
+ */
+function parseSymbolExpr(str) {
+    var symbol, node, result, result2, i, st,
+        newFrag = document.createDocumentFragment();
+    // remove the initial blanks
+    str = removeCharsAndBlanks(str, 0);
+    // get the initial symbol of the string
+    symbol = getSymbol(str);
+    // remove the initial symbol of str
+    str = removeCharsAndBlanks(str, symbol.input.length);
+    switch (symbol.ttype) {
+        case CONST:
+            // if is CONST, return node with text node child
+            var output = symbol.output;
+            node = createMathMLElementsWithChild(symbol.tag, document.createTextNode(output));
+            return [node, str, symbol.tag];
+        case LEFTBRACKET:
+            // if is left bracket symbol, then read expr
+            if (symbol.input == "\\left") {
+                symbol = getSymbol(str);
+                if (symbol != null) {
+                    if (symbol.input == ".")
+                        symbol.invisible = true;
+                    str = removeCharsAndBlanks(str, symbol.input.length);
+                }
+            }
+            result = parseExpr(str, true, false);
+            if (symbol == null ||
+                (typeof symbol.invisible == "boolean" && symbol.invisible))
+                node = createMathMLElementsWithChild("mrow", result[0]);
+            else {
+                node = createMathMLElementsWithChild("mo", document.createTextNode(symbol.output));
+                node = createMathMLElementsWithChild("mrow", node);
+                node.appendChild(result[0]);
+            }
+            return [node, result[1], result[2]];
+        case UNARY:
+            // if is command with 1 parameter
+            result = parseSymbolExpr(str);
+            if (result[0] == null) {
+                return [createMathMLElementsWithChild(symbol.tag, document.createTextNode(symbol.output)), str]
+            }
+            // if is function command
+            if (typeof symbol.func == "boolean" && symbol.func) {
 
-// function parseStrExpr(str) {
-//     var symbol, node, result, result2, i, st,
-//         newFrag = document.createDocumentFragment();
-//     // remove the initial blanks
-//     str = removeCharsAndBlanks(str, 0);
-//     // get the initial symbol of the string
-//     symbol = getSymbol(str);
-// }
+            }
+            // if is sqrt command
+            if (symbol.input == "\\sqrt") {
+                return [createMathMLElementsWithChild(symbol.tag, result[0]), result[1], symbol.tag]
+            } else if (symbol.input == "\\not") {
+                // not
 
-initSymbols()
-let msg = '\\alpha'
-msg = removeCharsAndBlanks(msg, 0);
-let sym = getSymbol(msg)
-console.log(msg)
-console.log(sym)
-console.log(msg === LTXNames[15])
+            } else if (typeof symbol.acc == "boolean" && symbol.acc) {
+                // if is special mark(accent)
+            } else {
+                // if is type style
+            }
+        case BINARY:
+            // if is binary command, 2 parameters
+            result = parseSymbolExpr(str);
+            if (result[0] == null) {
+                return [createMathMLElementsWithChild("mo", document.createTextNode(symbol.input)), str, null];
+            }
+            result2 = parseSymbolExpr(result[1]);
+            if (result2[0] == null) {
+                return [createMathMLElementsWithChild("mo", document.createTextNode(symbol.input)), str, null];
+            }
+            // if is root or stackrel, the order of parameters is different from frac
+            // {over}{under} -> <>under</> <>over</>
+            if (symbol.input == "\\root" || symbol.input == "\\stackrel") {
+                newFrag.appendChild(result2[0]);
+            }
+            newFrag.appendChild(result[0]);
+            // if is frac
+            // {child}{parent} -> <>child</> <>parent</>
+            if (symbol.input == "\\frac") {
+                newFrag.appendChild(result2[0]);
+            }
+            return [createMathMLElementsWithChild(symbol.tag, newFrag), result2[1], symbol.tag];
+    }
+}
+
+/**
+ * parse infix command before others
+ * @param str
+ */
+function parseInfixExpr(str) {
+    var symbol, sym1, sym2, node, result, tag, underover;
+    str = removeCharsAndBlanks(str, 0);
+    sym1 = getSymbol(str);
+    result = parseSymbolExpr(str);
+    node = result[0];
+    str = result[1];
+    tag = result[2];
+    symbol = getSymbol(str);
+    if (symbol.ttype == INFIX) {
+    }
+    return [node, str, tag];
+}
+
+/**
+ * parse parameter in bracket
+ * @param str
+ * @param rightbracket
+ * @param matrix
+ */
+function parseExpr(str, rightbracket, matrix) {
+    var symbol, node, result, i, tag,
+        newFrag = document.createDocumentFragment();
+    do {
+        // if not in bracket or
+        str = removeCharsAndBlanks(str, 0);
+        result = parseInfixExpr(str);
+        node = result[0];
+        str = result[1];
+        tag = result[2];
+        symbol = getSymbol(str);
+        if (node != undefined) {
+            newFrag.appendChild(node);
+        }
+    } while ((symbol.ttype != RIGHTBRACKET) && symbol != null && symbol.output != "");
+    tag = null;
+    // if get right bracket, back to top level
+    if (symbol.ttype == RIGHTBRACKET) {
+        if (symbol.input == "\\right") {
+
+        }
+        if (symbol != null) {
+            str = removeCharsAndBlanks(str, symbol.input.length);
+        }
+        var len = newFrag.childNodes.length;
+        // if the bracket is matrix
+        if (matrix) {
+        }
+        if (typeof symbol.invisible != "boolean" || !symbol.invisible) {
+            node = createMathMLElementsWithChild("mo", document.createTextNode(symbol.output));
+            newFrag.appendChild(node);
+        }
+        return [newFrag, str, tag];
+    }
+    return [newFrag, str, tag];
+}
+
+function parseMath(str) {
+    var node = createMathMLElements("mstyle");
+    // TODO:set mstyle
+
+    node.appendChild(parseExpr(str.replace(/^\s+/g, ""), false, false)[0]);
+    node = createMathMLElementsWithChild("math", node);
+    return node;
+}
+
+// initSymbols()
+// let msg = '\\root{100}{200}+1+a'
+// msg = removeCharsAndBlanks(msg, 0);
+// let sym = parseMath(msg)
+// // console.log(parseStrExpr(msg))
+// console.log(sym)
+// document.body.appendChild(sym)

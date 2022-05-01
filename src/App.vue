@@ -5,8 +5,9 @@
         version="1.1"
         style=" width: 100%; height: 100%; "
     >
+
       <g>
-        <foreignObject width="100%" height="100%" style="display: inline-block">
+        <foreignObject width="1" height="1" style="overflow: visible">
           <div
               xmlns="http://www.w3.org/1999/xhtml"
               style="display: inline-block"
@@ -15,6 +16,9 @@
             <p><em>hel11111</em><em><strong>111</strong></em><u><em><strong>111</strong></em></u><u><em>1lo</em></u></p>
           </div>
         </foreignObject>
+      </g>
+      <g>
+        <rect onclick="console.log('rect')" height="100" width="100" x='30'></rect>
       </g>
       <g>
         <foreignObject width="100%" height="100%" style="display: inline-block" x="100" y="100">
