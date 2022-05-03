@@ -1,12 +1,13 @@
 <template>
-  <!-- <Toolbar
-    v-bind:style="{ width: this.width + 'px', border: '1px solid #ccc' }"
-    :editor="editorRef"
-    :defaultConfig="toolbarConfig"
-    :mode="mode"
-  /> -->
-  <Editor
-      v-bind:style="{
+  <div>
+    <Toolbar
+        v-bind:style="{ border: '1px solid #ccc' }"
+        :editor="editor"
+        :defaultConfig="toolbarConfig"
+        :mode="mode"
+    />
+    <Editor
+        v-bind:style="{
       // 'z-index': 5,
       // bind css.height with data.height
       height: this.height +'px',
@@ -20,12 +21,13 @@
       'overflow-y': 'hidden',
       border: '1px solid #ccc',
     }"
-      v-model="valueHtml"
-      :defaultConfig="editorConfig"
-      :mode="mode"
-      @onCreated="onCreated"
-      @onBlur="handleBlur"
-  />
+        v-model="valueHtml"
+        :defaultConfig="editorConfig"
+        :mode="mode"
+        @onCreated="onCreated"
+        @onBlur="handleBlur"
+    />
+  </div>
 </template>
 
 <script>
@@ -33,12 +35,13 @@ import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 //eslint-disable-next-line
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
+// eslint-disable-next-line no-unused-vars
 import Vue from "vue";
 // import { Boot } from "@wangeditor/editor";
 // import formulaModule from "@wangeditor/plugin-formula";
 //eslint-disable-next-line
-export default Vue.extend({
-  name: "GlobalTextEditor",
+export default {
+  name: "integratedEditor",
   //eslint-disable-next-line
   components: {Editor, Toolbar},
   props: {},
@@ -46,6 +49,15 @@ export default Vue.extend({
     return {
       editor: null,
       valueHtml: "<p>text</p>",
+      mode: "simple", // or 'simple'
+      // the height of editor div
+      height: 300,
+      // the width of editor div
+      width: 100,
+      // the left distance of editor div from origin
+      left: 0,
+      // the top distance of editor div from origin
+      top: 0,
       editorConfig: {
         placeholder: "请输入内容...",
         hoverbarKeys:
@@ -57,15 +69,40 @@ export default Vue.extend({
                   }
             }
       },
-      mode: "simple", // or 'simple'
-      // the height of editor div
-      height: 300,
-      // the width of editor div
-      width: 100,
-      // the left distance of editor div from origin
-      left: 0,
-      // the top distance of editor div from origin
-      top: 0,
+      toolbarConfig: {
+        toolbarKeys: [
+          "fontSize",
+          "fontFamily",
+          "color",
+          "bgColor",
+          "|",
+          "bold",
+          "italic",
+          "underline",
+          // '|',
+          // 'insertFormula',
+          '|',
+          "justifyLeft",
+          "justifyRight",
+          "justifyCenter",
+          "justifyJustify",
+          '|',
+          'sub',
+          'sup',
+          // menu key
+          "headerSelect",
+
+          // "insertFormula", // “插入公式”菜单
+          // "editFormula", // “编辑公式”菜单
+          // group of menu items
+          {
+            key: "group-more-style",
+            title: "更多样式",
+            iconSvg: "<svg>....</svg>",
+            menuKeys: ["through", "code", "clearStyle"],
+          },
+        ],
+      },
     };
   },
   methods: {
@@ -116,5 +153,9 @@ export default Vue.extend({
     if (editor == null) return;
     editor.destroy(); // 组件销毁时，及时销毁编辑器
   },
-});
+}
 </script>
+
+<style scoped>
+
+</style>

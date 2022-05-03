@@ -20,7 +20,7 @@ export function editorWake(editor, toolbar, newHeight, newWidth, newContent, new
     editor.setContent(newContent);
     // error
     editor.focus();
-    toolbar.setEditor(editor.getEditor());
+    // toolbar.setEditor(editor.getEditor());
     // console.log(this.$refs.editor.getEditor());
     // }, 0);
     // this.editting = true;
