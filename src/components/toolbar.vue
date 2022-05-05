@@ -2,10 +2,6 @@
   <Toolbar
       v-bind:style="{
       border: '1px solid #ccc',
-      width: width + 'px',
-      // hegiht: height + 'px',
-      'z-index':99,
-      position: 'absolute',
     }"
       :editor="editorRef"
       :defaultConfig="toolbarConfig"

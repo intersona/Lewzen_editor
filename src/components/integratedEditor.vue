@@ -1,11 +1,32 @@
 <template>
   <div>
+
     <Toolbar
+        id="titleToolbar"
         v-bind:style="{ border: '1px solid #ccc' }"
-        :editor="editor"
-        :defaultConfig="toolbarConfig"
+        :editor=editor2
+        :defaultConfig="titleToolbarConfig"
         :mode="mode"
+        v-show="editingTitle"
     />
+    <Toolbar
+        id="bodyToolbar"
+        v-bind:style="{ border: '1px solid #ccc' }"
+        :editor=editor
+        :defaultConfig="bodyToolbarConfig"
+        :mode="mode"
+        v-show="editingBody"
+    />
+    <Editor
+        v-bind:style="{border:'1px solid #ccc'}"
+        v-model="valueHtmlTitle"
+        :mode="mode"
+        :defaultConfig="titleEditorConfig"
+        @onCreated="onCreatedTitle"
+        @onFocus="onFocusTitle"
+        @onChange="onTitleChange"
+    />
+
     <Editor
         v-bind:style="{
       // 'z-index': 5,
@@ -21,12 +42,15 @@
       'overflow-y': 'hidden',
       border: '1px solid #ccc',
     }"
-        v-model="valueHtml"
-        :defaultConfig="editorConfig"
+        v-model="bodyValueHtml"
+        :defaultConfig="bodyEditorConfig"
         :mode="mode"
         @onCreated="onCreated"
         @onBlur="handleBlur"
+        @onFocus="onFocusBody"
+        @onChange="onBodyChange"
     />
+
   </div>
 </template>
 
@@ -35,46 +59,74 @@ import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 //eslint-disable-next-line
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
+import editorUtils from "@/scripts/editorUtils";
+
+
 // eslint-disable-next-line no-unused-vars
 import Vue from "vue";
 // import { Boot } from "@wangeditor/editor";
 // import formulaModule from "@wangeditor/plugin-formula";
+
 //eslint-disable-next-line
 export default {
   name: "integratedEditor",
   //eslint-disable-next-line
-  components: {Editor, Toolbar},
+  components: {
+    Editor,
+    Toolbar,
+  },
   props: {},
+  mounted() {
+    editorUtils.sendEditor(this);
+    // editorUtils.sendBodyEditor(this.editor);
+  },
   data() {
     return {
       editor: null,
-      valueHtml: "<p>text</p>",
+      editor2: null,
+      editingTitle: false,
+      editingBody: false,
+      focusedEditor: null,
+      bodyValueHtml: "<p>content</p>",
+      valueHtmlTitle: "",
       mode: "simple", // or 'simple'
       // the height of editor div
       height: 300,
       // the width of editor div
       width: 100,
+      height2: 300,
       // the left distance of editor div from origin
       left: 0,
       // the top distance of editor div from origin
       top: 0,
-      editorConfig: {
+      bodyEditorConfig: {
         placeholder: "请输入内容...",
+        autoFocus: true,
         hoverbarKeys:
             {
-              formula:
-                  {
-                    menuKeys:
-                        ['editorFormula']
-                  }
+              // formula:
+              //     {
+              //       menuKeys:
+              //           ['editorFormula']
+              //     }
             }
       },
-      toolbarConfig: {
+      titleEditorConfig: {
+        placeholder: "请输入内容...",
+        autoFocus: true,
+        hoverbarKeys:
+            {
+              // formula:
+              //     {
+              //       menuKeys:
+              //           ['editorFormula']
+              //     }
+            }
+      },
+      bodyToolbarConfig: {
         toolbarKeys: [
           "fontSize",
           "fontFamily",
-          "color",
-          "bgColor",
           "|",
           "bold",
           "italic",
@@ -98,9 +150,31 @@ export default {
           {
             key: "group-more-style",
             title: "更多样式",
-            iconSvg: "<svg>....</svg>",
+            iconSvg: "<svg></svg>",
             menuKeys: ["through", "code", "clearStyle"],
           },
+        ],
+      },
+      titleToolbarConfig: {
+        toolbarKeys: [
+          "fontSize",
+          "fontFamily",
+          "color",
+          "bgColor",
+          "|",
+          "bold",
+          "italic",
+          "underline",
+          '|',
+          "justifyLeft",
+          "justifyRight",
+          "justifyCenter",
+          "justifyJustify",
+          '|',
+          // "insertFormula", // “插入公式”菜单
+          // "editFormula", // “编辑公式”菜单
+          // group of menu items
+          'through'
         ],
       },
     };
@@ -108,6 +182,11 @@ export default {
   methods: {
     onCreated(editor) {
       this.editor = Object.seal(editor); // 一定要用 Object.seal() ，否则会报错
+      // console.log(this.editor.getAllMenuKeys());
+      // console.log(editor.getMenuConfig('fontSize'))
+    },
+    onCreatedTitle(editor2) {
+      this.editor2 = Object.seal(editor2); // 一定要用 Object.seal() ，否则会报错
       // console.log(this.editor.getAllMenuKeys());
       // console.log(editor.getMenuConfig('fontSize'))
     },
@@ -128,11 +207,17 @@ export default {
       this.top = newTop;
     },
     // set the HTML content of editor
-    setContent(contentHTML) {
-      this.valueHtml = contentHTML;
+    setBodyContent(contentHTML) {
+      this.bodyValueHtml = contentHTML;
     },
-    getContent() {
-      return this.valueHtml
+    getBodyContent() {
+      return this.bodyValueHtml
+    },
+    setTitleContent(titleHTML) {
+      this.valueHtmlTitle = titleHTML;
+    },
+    getTitleContent() {
+      return this.valueHtmlTitle;
     },
     // get the editor instance
     getEditor() {
@@ -147,6 +232,22 @@ export default {
       // emit the event:editorBlur for the parent component
       this.$emit("editorBlur");
     },
+    onFocusBody() {
+      this.editingBody = true;
+      this.editingTitle = false;
+    },
+    onFocusTitle() {
+      this.editingBody = false;
+      this.editingTitle = true;
+    },
+    onTitleChange() {
+      console.log("title change")
+      this.$emit('titleChange')
+    },
+    onBodyChange() {
+      console.log("body change")
+      this.$emit('bodyChange')
+    }
   },
   beforeDestroy() {
     const editor = this.editor;
