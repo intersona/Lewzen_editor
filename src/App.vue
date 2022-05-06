@@ -52,7 +52,6 @@
 
 // import GlobalTextEditor from './components/textEditor.vue'
 // import editorToolbar from './components/toolbar.vue'
-import EditorPane from "@/components/editorTab.vue";
 // eslint-disable-next-line
 import {editorHide, editorWake} from './scripts/editorListener.js'
 import {createText} from './scripts/createTextTest.js'
@@ -66,7 +65,6 @@ export default {
     // GlobalTextEditor,
     // editorToolbar,
     // eslint-disable-next-line vue/no-unused-components
-    EditorPane,
   },
   data() {
     return {message: "<h1> 123 </h1>", editting: false};

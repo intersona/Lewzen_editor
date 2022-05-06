@@ -59,7 +59,7 @@ import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 //eslint-disable-next-line
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-import editorUtils from "@/scripts/editorUtils";
+// import editorUtils from "@/scripts/editorUtils";
 
 
 // eslint-disable-next-line no-unused-vars
@@ -77,7 +77,7 @@ export default {
   },
   props: {},
   mounted() {
-    editorUtils.sendEditor(this);
+    // editorUtils.sendEditor(this);
     // editorUtils.sendBodyEditor(this.editor);
   },
   data() {

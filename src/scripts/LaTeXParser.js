@@ -14,10 +14,16 @@
         type styles
 
     BINARY:func or symbol with 2 parameters, such as '\frac'
+        root/frac/stackrel
+        textcolor/colorbox
 
     INFIX:symbol with 1 parameter, such as '^'
+        atop/choose
+        ^/_
 
-    LEFRBRACKET&RIGHTBRACKET:closed symbols, such as '[' & ']'
+    LEFTBRACKET&RIGHTBRACKET:closed symbols
+        left & right
+        { & }
 
     SPACE:space between elements
 
@@ -60,6 +66,17 @@ var AMsqrt = {input: "\\sqrt", tag: "msqrt", output: "sqrt", ttype: UNARY},
     AMsup = {input: "^", tag: "msup", output: "^", ttype: INFIX},
     AMtext = {input: "\\mathrm", tag: "mtext", output: "text", ttype: TEXT},
     AMmbox = {input: "\\mbox", tag: "mtext", output: "mbox", ttype: TEXT};
+
+// List of negations obtained from http://frodo.elon.edu/tutorial/tutorial.pdf
+// symbol:not symbol
+var AMRelationNegations = {
+    "\u003C": "\u226E", "\u003E": "\u226F", "\u2264": "\u2270", "\u2265": "\u2271",
+    "\u003D": "\u2260", "\u2261": "\u2262", "\u227A": "\u2280", "\u227B": "\u2281",
+    "\u227C": "\u22E0", "\u227D": "\u22E1", "\u223C": "\u2241", "\u2243": "\u2244",
+    "\u2282": "\u2284", "\u2283": "\u2285", "\u2286": "\u2288", "\u2287": "\u2289",
+    "\u2248": "\u2249", "\u2245": "\u2247", "\u2291": "\u22E2", "\u2292": "\u22E3",
+    "\u224D": "\u226D"
+}
 
 // eslint-disable-next-line no-unused-vars
 var AMsymbols = [
@@ -605,6 +622,10 @@ function parseSymbolExpr(str) {
     // remove the initial symbol of str
     str = removeCharsAndBlanks(str, symbol.input.length);
     switch (symbol.ttype) {
+        case SPACE:
+            node = createMathMLElements(symbol.tag);
+            node.setAttribute(symbol.atname, symbol.atval);
+            return [node, str, symbol.tag]
         case CONST:
             // if is CONST, return node with text node child
             var output = symbol.output;
@@ -638,18 +659,66 @@ function parseSymbolExpr(str) {
             }
             // if is function command
             if (typeof symbol.func == "boolean" && symbol.func) {
-
+                st = str.charAt(0);
+                // such as \exp, \log
+                if (st == '^' || st == '_' || st == ',') {
+                    return [createMathMLElementsWithChild(
+                        symbol.tag, document.createTextNode(symbol.output)
+                    ), str, symbol.tag];
+                } else {
+                    node = createMathMLElementsWithChild(
+                        "mrow", createMathMLElementsWithChild(
+                            symbol.tag, document.createTextNode(symbol.output)
+                        )
+                    );
+                    node.appendChild(result[0]);
+                    return [node, result[1], symbol.tag];
+                }
             }
             // if is sqrt command
             if (symbol.input == "\\sqrt") {
                 return [createMathMLElementsWithChild(symbol.tag, result[0]), result[1], symbol.tag]
             } else if (symbol.input == "\\not") {
                 // not
+                text = result[0].childNodes[0].nodeValue;
+                if (typeof text == "string" && text.length == 1 && text in AMRelationNegations) {
+                    result[0].childNodes[0].nodeValue = AMRelationNegations[text];
+                    return [createMathMLElementsWithChild(
+                        symbol.tag, result[0]
+                    ), result[1], symbol.tag];
+                }
+                // TODO:删除线
+                return [createMathMLElementsWithChild(
+                    "mo", document.createTextNode("\\")
+                ), "not " + str, symbol.tag];
 
             } else if (typeof symbol.acc == "boolean" && symbol.acc) {
+                node = createMathMLElementsWithChild(
+                    symbol.tag, result[0]
+                );
+                let output = symbol.output;
                 // if is special mark(accent)
+                let node1 = createMathMLElementsWithChild(
+                    "mo", document.createTextNode(output)
+                );
+                // TODO: adjust css
+                if (symbol.input == "\\vec" || symbol.input == "\\check") {
+                    node1.setAttribute("maxsize", "1.2")
+                }
+                if (symbol.input == "\\bar") {
+                    node1.setAttribute("maxsize", "0.5");
+                }
+                if (symbol.input == "\\underbrace" || symbol.input == "\\underline") {
+                    node1.setAttribute("accentunder", "true");
+                } else {
+                    node1.setAttribute("accent", "true");
+                }
+                node.appendChild(node1);
+                if (symbol.input == "\\overbrace" || symbol.input == "\\underbrace")
+                    node.ttype = UNDEROVER;
+                return [node, result[1], symbol.tag];
             } else {
-                // if is type style
+                // TODO:if is type style
             }
         case BINARY:
             // if is binary command, 2 parameters
@@ -673,11 +742,27 @@ function parseSymbolExpr(str) {
                 newFrag.appendChild(result2[0]);
             }
             return [createMathMLElementsWithChild(symbol.tag, newFrag), result2[1], symbol.tag];
+        case UNDEROVER:
+            return [createMathMLElementsWithChild(
+                symbol.tag, document.createTextNode(symbol.output)), str, symbol.tag];
+        case INFIX:
+            str = removeCharsAndBlanks(
+                str, symbol.input.length
+            );
+            return [createMathMLElementsWithChild(
+                "mo", document.createTextNode(symbol.output)
+            ), str, symbol.tag]
+        default:
+            return [createMathMLElementsWithChild(
+                symbol.tag, document.createTextNode(symbol.output)
+            ), str, symbol.tag]
     }
 }
 
 /**
  * parse infix command before others
+ *
+ * parse infix differently cause it's position is between 2 parameter
  * @param str
  */
 function parseInfixExpr(str) {
@@ -689,7 +774,50 @@ function parseInfixExpr(str) {
     str = result[1];
     tag = result[2];
     symbol = getSymbol(str);
+    // if true the above node is 1st parameter
     if (symbol.ttype == INFIX) {
+        // if tag is infix
+        str = removeCharsAndBlanks(str, symbol.input.length);
+        result = parseSymbolExpr(str);
+        // show box in place of missing argument
+        if (result[0] == null) {
+            result[0] = createMathMLElementsWithChild(
+                'mo', document.createTextNode('\u25A1'));
+        }
+        str = result[1];
+        tag = result[2];
+        // if is under or over
+        if (symbol.input == "_" || symbol.input == "^") {
+            // the second parameter
+            sym2 = getSymbol(str);
+            tag = null;
+            // for command like $ /sum_1^k $
+            underover = (sym1.ttype == UNDEROVER);
+            if (symbol.input == '_' && sym2.input == '^') {
+                str = removeCharsAndBlanks(str, sym2.input.length);
+                let res2 = parseSymbolExpr(str);
+                str = res2[1];
+                tag = res2[2];
+                node = createMathMLElementsWithChild((underover ? "munderover" : "msubsup"), node);
+                node.appendChild(result[0]);
+                node.appendChild(res2[0]);
+            } else if (symbol.input == "_") {
+                node = createMathMLElementsWithChild((underover ? "munder" : "msub"), node);
+                node.appendChild(result[0]);
+            } else {
+                // symbol.input == "^"
+                node = createMathMLElementsWithChild((underover ? "mover" : "msup"), node);
+                node.appendChild(result[0]);
+            }
+            node = createMathMLElementsWithChild("mrow", node)
+        } else {
+            // atop & choose
+            node = createMathMLElementsWithChild(symbol.tag, node);
+            if (symbol.input == "\\atop" || symbol.input == "\\choose") {
+
+            }
+            node.appendChild(result[0])
+        }
     }
     return [node, str, tag];
 }
@@ -712,14 +840,30 @@ function parseExpr(str, rightbracket, matrix) {
         tag = result[2];
         symbol = getSymbol(str);
         if (node != undefined) {
+            if ((tag == "mn" || tag == "mi") && symbol != null &&
+                typeof symbol.func == "boolean" && symbol.func) {
+                // add space before \sin in 2\sin x
+                let space = createMathMLElementsWithChild("mspace");
+                space.setAttribute("width", "0.167em");
+                node = createMathMLElementsWithChild("mrow", node);
+                node.appendChild(space);
+            }
             newFrag.appendChild(node);
         }
-    } while ((symbol.ttype != RIGHTBRACKET) && symbol != null && symbol.output != "");
+    } while ((symbol.ttype != RIGHTBRACKET) && symbol != null
+    && symbol.output != "");
     tag = null;
     // if get right bracket, back to top level
     if (symbol.ttype == RIGHTBRACKET) {
         if (symbol.input == "\\right") {
-
+            str = removeCharsAndBlanks(str, symbol.input.length);
+            symbol = getSymbol(str);
+            if (symbol != null && symbol.input == '.') {
+                symbol.invisible = true;
+            }
+            if (symbol != null) {
+                tag = symbol.rtag;
+            }
         }
         if (symbol != null) {
             str = removeCharsAndBlanks(str, symbol.input.length);
@@ -746,10 +890,11 @@ function parseMath(str) {
     return node;
 }
 
-// initSymbols()
-// let msg = '\\root{100}{200}+1+a'
-// msg = removeCharsAndBlanks(msg, 0);
-// let sym = parseMath(msg)
-// // console.log(parseStrExpr(msg))
-// console.log(sym)
-// document.body.appendChild(sym)
+initSymbols()
+let msg = '\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+x}}}}}}}'
+let msg2 = '\\Gamma(t) = \\lim_{n \\to \\infty} \\frac{n! \\; n^t}{t \\; (t+1)\\cdots(t+n)}= \\frac{1}{t} \\prod_{n=1}^\\infty \\frac{\\left(1+\\frac{1}{n}\\right)^t}{1+\\frac{t}{n}} = \\frac{e^{-\\gamma t}}{t} \\prod_{n=1}^\\infty \\left(1 + \\frac{t}{n}\\right)^{-1} e^{\\frac{t}{n}}'
+msg = removeCharsAndBlanks(msg, 0);
+let sym = parseMath(msg)
+// console.log(parseStrExpr(msg))
+console.log(sym)
+document.body.appendChild(sym)
