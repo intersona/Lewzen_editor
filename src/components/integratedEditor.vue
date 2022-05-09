@@ -87,7 +87,9 @@ export default {
       editingTitle: false,
       editingBody: false,
       focusedEditor: null,
+      // body编辑器的文本内容的HTML
       bodyValueHtml: "<p>content</p>",
+      // title编辑器的文本内容的HTML
       valueHtmlTitle: "",
       mode: "simple", // or 'simple'
       // the height of editor div
@@ -131,8 +133,8 @@ export default {
           "bold",
           "italic",
           "underline",
-          // '|',
-          // 'insertFormula',
+          '|',
+          'editFormula',
           '|',
           "justifyLeft",
           "justifyRight",
@@ -143,9 +145,8 @@ export default {
           'sup',
           // menu key
           "headerSelect",
-
-          // "insertFormula", // “插入公式”菜单
-          // "editFormula", // “编辑公式”菜单
+          "insertFormula", // “插入公式”菜单
+          "editFormula", // “编辑公式”菜单
           // group of menu items
           {
             key: "group-more-style",
@@ -181,12 +182,12 @@ export default {
   },
   methods: {
     onCreated(editor) {
-      this.editor = Object.seal(editor); // 一定要用 Object.seal() ，否则会报错
+      this.editor = Object.seal(editor); 
       // console.log(this.editor.getAllMenuKeys());
       // console.log(editor.getMenuConfig('fontSize'))
     },
     onCreatedTitle(editor2) {
-      this.editor2 = Object.seal(editor2); // 一定要用 Object.seal() ，否则会报错
+      this.editor2 = Object.seal(editor2); 
       // console.log(this.editor.getAllMenuKeys());
       // console.log(editor.getMenuConfig('fontSize'))
     },
@@ -241,11 +242,12 @@ export default {
       this.editingTitle = true;
     },
     onTitleChange() {
-      console.log("title change")
+      // console.log("title change")
       this.$emit('titleChange')
     },
     onBodyChange() {
-      console.log("body change")
+      // console.log("body change")
+      // console.log(this.bodyValueHtml);
       this.$emit('bodyChange')
     }
   },

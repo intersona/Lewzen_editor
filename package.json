@@ -10,15 +10,22 @@
   "dependencies": {
     "@wangeditor/editor": "^5.0.1",
     "@wangeditor/editor-for-vue": "^1.0.0",
+    "@wangeditor/plugin-formula": "^1.0.10",
+    "@wangeditor/plugin-md": "^1.0.0",
     "core-js": "^3.8.3",
     "element-ui": "^2.15.8",
     "katex": "^0.15.3",
+    "raw-loader": "^4.0.2",
     "snabbdom": "^3.5.0",
+    "ts-loader": "^9.3.0",
+    "typescript": "^4.6.4",
     "vue": "^2.6.14"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@types/jquery": "^3.5.14",
+    "@types/katex": "^0.14.0",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",

@@ -591,7 +591,7 @@ function getSymbol(str) {
         return AMsymbols[matchp];
     }
     // no corresponding command, meaning number or identifier or operator
-    console.log('no match')
+    // console.log('no match')
     currentSymbol = CONST;
     newp = 1;
     // take 1 character
@@ -680,7 +680,7 @@ function parseSymbolExpr(str) {
                 return [createMathMLElementsWithChild(symbol.tag, result[0]), result[1], symbol.tag]
             } else if (symbol.input == "\\not") {
                 // not
-                text = result[0].childNodes[0].nodeValue;
+                var text = result[0].childNodes[0].nodeValue;
                 if (typeof text == "string" && text.length == 1 && text in AMRelationNegations) {
                     result[0].childNodes[0].nodeValue = AMRelationNegations[text];
                     return [createMathMLElementsWithChild(
@@ -843,7 +843,7 @@ function parseExpr(str, rightbracket, matrix) {
             if ((tag == "mn" || tag == "mi") && symbol != null &&
                 typeof symbol.func == "boolean" && symbol.func) {
                 // add space before \sin in 2\sin x
-                let space = createMathMLElementsWithChild("mspace");
+                let space = createMathMLElements("mspace");
                 space.setAttribute("width", "0.167em");
                 node = createMathMLElementsWithChild("mrow", node);
                 node.appendChild(space);
@@ -881,7 +881,12 @@ function parseExpr(str, rightbracket, matrix) {
     return [newFrag, str, tag];
 }
 
-function parseMath(str) {
+/**
+ * 
+ * @param {*} str latex公式源代码
+ * @returns 
+ */
+export function parseMath(str) {
     var node = createMathMLElements("mstyle");
     // TODO:set mstyle
 
@@ -890,6 +895,11 @@ function parseMath(str) {
     return node;
 }
 
+// export default {
+//     name:'latexParser',
+//     parseMath
+    
+// }
 initSymbols()
 let msg = '\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+x}}}}}}}'
 let msg2 = '\\Gamma(t) = \\lim_{n \\to \\infty} \\frac{n! \\; n^t}{t \\; (t+1)\\cdots(t+n)}= \\frac{1}{t} \\prod_{n=1}^\\infty \\frac{\\left(1+\\frac{1}{n}\\right)^t}{1+\\frac{t}{n}} = \\frac{e^{-\\gamma t}}{t} \\prod_{n=1}^\\infty \\left(1 + \\frac{t}{n}\\right)^{-1} e^{\\frac{t}{n}}'
@@ -898,3 +908,25 @@ let sym = parseMath(msg)
 // console.log(parseStrExpr(msg))
 console.log(sym)
 document.body.appendChild(sym)
+
+/**
+ * 
+ * @param {*} str HTML of editor value with replacing $$ with <math>
+ */
+export function replaceDollarFormula(str){
+    var array = str.match(/\$[^>]*\$/g)
+    var transStr = str
+    for(var s in array){
+        transStr = transStr.replace(array[s],procedeDollar(array[s]))
+
+    }
+    console.log(transStr);
+}
+
+function procedeDollar(str){
+    str =str.slice(1,-1)
+    var mathStr = parseMath(str)
+    return mathStr.outerHTML
+}
+
+// replaceDollarFormula('asdas$afds$gfd12')

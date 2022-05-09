@@ -24,13 +24,15 @@
 
         <g>
           <foreignObject width="100%" height="100%" style="display: inline-block;overflow: visible" x="100" y="100">
-            <math xmlns="http://www.w3.org/1998/Math/MathML">
+            <strong>
+              <math xmlns="http://www.w3.org/1998/Math/MathML">
               <msubsup>
                 <mo>&#x222B;<!-- 积分 --></mo>
                 <mn>0</mn>
                 <mn>1</mn>
               </msubsup>
             </math>
+            </strong>
           </foreignObject>
         </g>
       </svg>
@@ -53,8 +55,8 @@
 // import GlobalTextEditor from './components/textEditor.vue'
 // import editorToolbar from './components/toolbar.vue'
 // eslint-disable-next-line
-import {editorHide, editorWake} from './scripts/editorListener.js'
-import {createText} from './scripts/createTextTest.js'
+// import {editorHide, editorWake} from './scripts/editorListener.js'
+// import {createText} from './scripts/createTextTest.js'
 import IntegratedEditor from "@/components/integratedEditor";
 import editorUtils from './scripts/editorUtils.js'
 
@@ -75,7 +77,7 @@ export default {
   },
   methods: {
     onclick1() {
-      createText()
+      // createText()
     },
     // eslint-disable-next-line no-unused-vars
     ondblclick(event) {
