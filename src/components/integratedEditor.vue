@@ -104,6 +104,7 @@ export default {
       bodyEditorConfig: {
         placeholder: "请输入内容...",
         autoFocus: true,
+
         hoverbarKeys:
             {
               // formula:
@@ -133,8 +134,6 @@ export default {
           "bold",
           "italic",
           "underline",
-          '|',
-          'editFormula',
           '|',
           "justifyLeft",
           "justifyRight",
@@ -182,12 +181,13 @@ export default {
   },
   methods: {
     onCreated(editor) {
-      this.editor = Object.seal(editor); 
+      this.editor = Object.seal(editor);
+      // console.log(editor.getConfig())
       // console.log(this.editor.getAllMenuKeys());
       // console.log(editor.getMenuConfig('fontSize'))
     },
     onCreatedTitle(editor2) {
-      this.editor2 = Object.seal(editor2); 
+      this.editor2 = Object.seal(editor2);
       // console.log(this.editor.getAllMenuKeys());
       // console.log(editor.getMenuConfig('fontSize'))
     },

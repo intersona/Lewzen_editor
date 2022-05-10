@@ -34,8 +34,8 @@
 
 // TODO: should be
 const MathMLNS
-    = "http://www.w3.org/1999/xhtml";
-
+    // = "http://www.w3.org/1999/xhtml";
+    = "http://www.w3.org/1998/Math/MathML";
 var CONST = 0, UNARY = 1, BINARY = 2, INFIX = 3, LEFTBRACKET = 4,
     RIGHTBRACKET = 5, SPACE = 6, UNDEROVER = 7, DEFINITION = 8,
     TEXT = 9, BIG = 10, LONG = 11, STRETCHY = 12, MATRIX = 13; // token types
@@ -882,9 +882,9 @@ function parseExpr(str, rightbracket, matrix) {
 }
 
 /**
- * 
+ *
  * @param {*} str latex公式源代码
- * @returns 
+ * @returns
  */
 export function parseMath(str) {
     var node = createMathMLElements("mstyle");
@@ -898,35 +898,49 @@ export function parseMath(str) {
 // export default {
 //     name:'latexParser',
 //     parseMath
-    
+
 // }
 initSymbols()
 let msg = '\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+\\sqrt{1+x}}}}}}}'
 let msg2 = '\\Gamma(t) = \\lim_{n \\to \\infty} \\frac{n! \\; n^t}{t \\; (t+1)\\cdots(t+n)}= \\frac{1}{t} \\prod_{n=1}^\\infty \\frac{\\left(1+\\frac{1}{n}\\right)^t}{1+\\frac{t}{n}} = \\frac{e^{-\\gamma t}}{t} \\prod_{n=1}^\\infty \\left(1 + \\frac{t}{n}\\right)^{-1} e^{\\frac{t}{n}}'
 msg = removeCharsAndBlanks(msg, 0);
 let sym = parseMath(msg)
+sym.setAttribute('id', 'math1')
 // console.log(parseStrExpr(msg))
-console.log(sym)
+// console.log(sym)
 document.body.appendChild(sym)
 
+import * as htmlToImage from 'html-to-image';
+import {toPng, toJpeg, toBlob, toPixelData, toSvg} from 'html-to-image';
+
+// function filter (node) {
+//     return (node.tagName !== 'i');
+// }
+
+// htmlToImage.toSvg(document.getElementById('math1'), { filter: filter })
+//     .then(function (dataUrl) {
+//         /* do something */
+//         console.log(dataUrl)
+//     });
+
+
 /**
- * 
+ *
  * @param {*} str HTML of editor value with replacing $$ with <math>
  */
-export function replaceDollarFormula(str){
+export function replaceDollarFormula(str) {
     var array = str.match(/\$[^>]*\$/g)
     var transStr = str
-    for(var s in array){
-        transStr = transStr.replace(array[s],procedeDollar(array[s]))
+    for (var s in array) {
+        transStr = transStr.replace(array[s], procedeDollar(array[s]))
 
     }
-    console.log(transStr);
+    // console.log(transStr);
 }
 
-function procedeDollar(str){
-    str =str.slice(1,-1)
+function procedeDollar(str) {
+    str = str.slice(1, -1)
     var mathStr = parseMath(str)
     return mathStr.outerHTML
 }
 
-// replaceDollarFormula('asdas$afds$gfd12')

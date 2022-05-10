@@ -6,35 +6,55 @@
           version="1.1"
           style=" width: 100%; height: 100%; "
       >
-        <g>
-          <rect @click="onclick1" height="100" width="100" x='30'></rect>
-        </g>
+
+<!--        <g>-->
+
+<!--          <rect height="100" width="100" x='30' y="30" opacity=".5"></rect>-->
+
+<!--        </g>-->
+
         <g>
           <foreignObject width="1" height="1" style="overflow: visible">
+            <!--            <el-tooltip placement="right" >-->
+            <!--              <div slot="content">455</div>-->
             <div
                 xmlns="http://www.w3.org/1999/xhtml"
                 style="display: inline-block"
-                @dblclick="ondblclick"
             >
               <p><em>hel11111</em><em><strong>111</strong></em><u><em><strong>111</strong></em></u><u><em>1lo</em></u>
               </p>
             </div>
+            <!--            </el-tooltip>-->
           </foreignObject>
         </g>
 
-        <g>
-          <foreignObject width="100%" height="100%" style="display: inline-block;overflow: visible" x="100" y="100">
-            <strong>
-              <math xmlns="http://www.w3.org/1998/Math/MathML">
-              <msubsup>
-                <mo>&#x222B;<!-- 积分 --></mo>
-                <mn>0</mn>
-                <mn>1</mn>
-              </msubsup>
-            </math>
-            </strong>
-          </foreignObject>
-        </g>
+                <g>
+                  <foreignObject width="100%" height="100%" style="display: inline-block;overflow: visible" x="100" y="100">
+        <!--            <style>-->
+        <!--              @import "scripts/mathml.css";-->
+        <!--            </style>-->
+                    <el-tooltip>
+                      <div slot="content">
+                        <math xmlns="http://www.w3.org/1998/Math/MathML">
+                          <msubsup>
+                            <mo>&#x222B;<!-- 积分 --></mo>
+                            <mn>0</mn>
+                            <mn>1</mn>
+                          </msubsup>
+                        </math>
+                      </div>
+                      <strong>
+                        <math xmlns="http://www.w3.org/1998/Math/MathML">
+                          <msubsup>
+                            <mo>&#x222B;<!-- 积分 --></mo>
+                            <mn>0</mn>
+                            <mn>1</mn>
+                          </msubsup>
+                        </math>
+                      </strong>
+                    </el-tooltip>
+                  </foreignObject>
+                </g>
       </svg>
     </div>
     <div>
@@ -77,6 +97,7 @@ export default {
   },
   methods: {
     onclick1() {
+      console.log('rect')
       // createText()
     },
     // eslint-disable-next-line no-unused-vars
