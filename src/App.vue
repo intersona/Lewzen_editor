@@ -7,11 +7,11 @@
           style=" width: 100%; height: 100%; "
       >
 
-<!--        <g>-->
+        <!--        <g>-->
 
-<!--          <rect height="100" width="100" x='30' y="30" opacity=".5"></rect>-->
+        <!--          <rect height="100" width="100" x='30' y="30" opacity=".5"></rect>-->
 
-<!--        </g>-->
+        <!--        </g>-->
 
         <g>
           <foreignObject width="1" height="1" style="overflow: visible">
@@ -28,33 +28,33 @@
           </foreignObject>
         </g>
 
-                <g>
-                  <foreignObject width="100%" height="100%" style="display: inline-block;overflow: visible" x="100" y="100">
-        <!--            <style>-->
-        <!--              @import "scripts/mathml.css";-->
-        <!--            </style>-->
-                    <el-tooltip>
-                      <div slot="content">
-                        <math xmlns="http://www.w3.org/1998/Math/MathML">
-                          <msubsup>
-                            <mo>&#x222B;<!-- 积分 --></mo>
-                            <mn>0</mn>
-                            <mn>1</mn>
-                          </msubsup>
-                        </math>
-                      </div>
-                      <strong>
-                        <math xmlns="http://www.w3.org/1998/Math/MathML">
-                          <msubsup>
-                            <mo>&#x222B;<!-- 积分 --></mo>
-                            <mn>0</mn>
-                            <mn>1</mn>
-                          </msubsup>
-                        </math>
-                      </strong>
-                    </el-tooltip>
-                  </foreignObject>
-                </g>
+        <g>
+          <foreignObject  width="100%" height="100%" style="display: inline-block;overflow: visible" x="100" y="100">
+            <!--            <style>-->
+            <!--              @import "scripts/mathml.css";-->
+            <!--            </style>-->
+            <el-tooltip>
+              <div slot="content">
+                <math xmlns="http://www.w3.org/1998/Math/MathML">
+                  <msubsup>
+                    <mo>&#x222B;<!-- 积分 --></mo>
+                    <mn>0</mn>
+                    <mn>1</mn>
+                  </msubsup>
+                </math>
+              </div>
+              <div @click="ondblclick">
+                <math data-value="\frac{0}{1}"  xmlns="http://www.w3.org/1998/Math/MathML">
+                  <msubsup>
+                    <mo>&#x222B;<!-- 积分 --></mo>
+                    <mn>0</mn>
+                    <mn>1</mn>
+                  </msubsup>
+                </math>
+              </div>
+            </el-tooltip>
+          </foreignObject>
+        </g>
       </svg>
     </div>
     <div>
@@ -72,11 +72,6 @@
 
 <script>
 
-// import GlobalTextEditor from './components/textEditor.vue'
-// import editorToolbar from './components/toolbar.vue'
-// eslint-disable-next-line
-// import {editorHide, editorWake} from './scripts/editorListener.js'
-// import {createText} from './scripts/createTextTest.js'
 import IntegratedEditor from "@/components/integratedEditor";
 import editorUtils from './scripts/editorUtils.js'
 
@@ -102,6 +97,7 @@ export default {
     },
     // eslint-disable-next-line no-unused-vars
     ondblclick(event) {
+      console.log(event.currentTarget.innerHTML)
       editorUtils.setTitle(event.currentTarget.innerHTML)
     },
     onEditorBlur() {

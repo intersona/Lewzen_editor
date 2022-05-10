@@ -20,7 +20,7 @@ function parseHtml(
 }
 
 const parseHtmlConf = {
-  selector: 'span[type="formula"]',
+  selector: 'math',
   parseElemHtml: parseHtml,
 }
 

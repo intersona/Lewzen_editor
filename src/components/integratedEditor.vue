@@ -1,10 +1,9 @@
 <template>
   <div>
-
     <Toolbar
         id="titleToolbar"
         v-bind:style="{ border: '1px solid #ccc' }"
-        :editor=editor2
+        :editor=titleEditor
         :defaultConfig="titleToolbarConfig"
         :mode="mode"
         v-show="editingTitle"
@@ -12,7 +11,7 @@
     <Toolbar
         id="bodyToolbar"
         v-bind:style="{ border: '1px solid #ccc' }"
-        :editor=editor
+        :editor=bodyEditor
         :defaultConfig="bodyToolbarConfig"
         :mode="mode"
         v-show="editingBody"
@@ -59,15 +58,10 @@ import "@wangeditor/editor/dist/css/style.css"; // 引入 css
 //eslint-disable-next-line
 import {onBeforeUnmount, ref, shallowRef} from "vue";
 import {Editor, Toolbar} from "@wangeditor/editor-for-vue";
-// import editorUtils from "@/scripts/editorUtils";
+import editorUtils from "@/scripts/editorUtils";
 
+import {parseMath} from "@/scripts/LaTeXParser";
 
-// eslint-disable-next-line no-unused-vars
-import Vue from "vue";
-// import { Boot } from "@wangeditor/editor";
-// import formulaModule from "@wangeditor/plugin-formula";
-
-//eslint-disable-next-line
 export default {
   name: "integratedEditor",
   //eslint-disable-next-line
@@ -77,30 +71,37 @@ export default {
   },
   props: {},
   mounted() {
-    // editorUtils.sendEditor(this);
-    // editorUtils.sendBodyEditor(this.editor);
+    editorUtils.sendEditor(this);
+    setTimeout(() => {
+      this.valueHtmlTitle ="<math data-value='\\frac{1}{2}'>123</math>"
+    },1500)
   },
   data() {
     return {
-      editor: null,
-      editor2: null,
+      // body editor
+      bodyEditor: null,
+      // title editor
+      titleEditor: null,
+      // 标志哪一个编辑器处于编辑状态（focus），以显示其toolbar
       editingTitle: false,
       editingBody: false,
-      focusedEditor: null,
       // body编辑器的文本内容的HTML
       bodyValueHtml: "<p>content</p>",
       // title编辑器的文本内容的HTML
       valueHtmlTitle: "",
-      mode: "simple", // or 'simple'
-      // the height of editor div
+      // 编辑器模式，不显示hoverBar
+      mode: "simple",
+      // the height of BODY editor div
       height: 300,
-      // the width of editor div
+      // the width of BODY editor div
       width: 100,
+      // title editor的宽
       height2: 300,
       // the left distance of editor div from origin
       left: 0,
       // the top distance of editor div from origin
       top: 0,
+      // 标记其的配置信息
       bodyEditorConfig: {
         placeholder: "请输入内容...",
         autoFocus: true,
@@ -126,6 +127,7 @@ export default {
               //     }
             }
       },
+      // toolbar的配置信息
       bodyToolbarConfig: {
         toolbarKeys: [
           "fontSize",
@@ -180,14 +182,15 @@ export default {
     };
   },
   methods: {
+    // 组件创建时的触发事件
     onCreated(editor) {
-      this.editor = Object.seal(editor);
+      this.bodyEditor = Object.seal(editor);
       // console.log(editor.getConfig())
       // console.log(this.editor.getAllMenuKeys());
       // console.log(editor.getMenuConfig('fontSize'))
     },
     onCreatedTitle(editor2) {
-      this.editor2 = Object.seal(editor2);
+      this.titleEditor = Object.seal(editor2);
       // console.log(this.editor.getAllMenuKeys());
       // console.log(editor.getMenuConfig('fontSize'))
     },
@@ -211,22 +214,24 @@ export default {
     setBodyContent(contentHTML) {
       this.bodyValueHtml = contentHTML;
     },
+    // body editor：将文本HTML中的$$中的公式替换为mathml后，返回HTML
     getBodyContent() {
-      return this.bodyValueHtml
+      return this.replaceDollarFormula(this.bodyValueHtml)
     },
     setTitleContent(titleHTML) {
       this.valueHtmlTitle = titleHTML;
     },
+    // title editor：将文本HTML中的$$中的公式替换为mathml后，返回HTML
     getTitleContent() {
-      return this.valueHtmlTitle;
+      return this.replaceDollarFormula(this.valueHtmlTitle);
     },
     // get the editor instance
     getEditor() {
-      return this.editor;
+      return this.bodyEditor;
     },
     focus() {
-      this.editor.focus();
-      this.editor.selectAll();
+      this.bodyEditor.focus();
+      this.bodyEditor.selectAll();
     },
     // the function when the editor lose focal(blur)
     handleBlur() {
@@ -246,19 +251,43 @@ export default {
       this.$emit('titleChange')
     },
     onBodyChange() {
+      console.log(this.getBodyContent())
       // console.log("body change")
       // console.log(this.bodyValueHtml);
       this.$emit('bodyChange')
-    }
+    },
+    insertHTML2Title(html) {
+      this.titleEditor.dangerouslyInsertHtml(html);
+    },
+    proceedDollar(str) {
+      str = str.slice(1, -1)
+      let mathStr = parseMath(str)
+      return mathStr.outerHTML
+    },
+    /**
+     *
+     * @param {*} str HTML of editor value with replacing ${}$ with <math>
+     */
+    replaceDollarFormula(str) {
+      let array = str.match(/\$[^>]*\$/g)
+      let transStr = str
+      for (let s in array) {
+        transStr = transStr.replace(array[s], this.proceedDollar(array[s]))
+      }
+      // console.log(transStr);
+      return transStr
+    },
+
+
   },
   beforeDestroy() {
-    const editor = this.editor;
+    const editor = this.bodyEditor;
     if (editor == null) return;
     editor.destroy(); // 组件销毁时，及时销毁编辑器
-  },
+  }
+  ,
 }
 </script>
 
 <style scoped>
-
 </style>
